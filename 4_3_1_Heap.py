@@ -1,6 +1,5 @@
-from random import randint
 
-class Heap():
+class Heap:
 
 
 	def __init__(self):
@@ -20,24 +19,35 @@ class Heap():
 
 		self.body[parent_index] = self.body[-1]
 		del self.body[-1]
-
-		child_1_index = parent_index * 2
-		# if child_1_index > len(self.body) - 1:
-		# 	child_1 = None 
-		child_2_index = parent_index * 2 + 1
-		# if child_2_index > len(self.body) - 1:
-		# 	child_2 = None
-
-		if self.body[parent_index] < self.body[child_1_index] or self.body[parent_index] < self.body[child_2_index]:
-			parent = self.body[parent_index]
-			if self.body[child_1_index] > self.body[child_2_index]:
-				self.body[parent_index] = self.body[child_1_index]
-				self.body[child_1_index] = parent
-			else:
-				self.body[parent_index] = self.body[child_2_index]
-				self.body[child_2_index] = parent
-
-		print(response)
+		length = len(self.body) - 1
+		while True:
+			if length - (parent_index * 2) >= 1:
+				child_1 = self.body[parent_index * 2]
+				child_2 = self.body[parent_index * 2 + 1]
+				if self.body[parent_index] > child_1 and self.body[parent_index] > child_2:
+					break
+				else:
+					if child_1 >= child_2:
+						self.body[parent_index * 2] = self.body[parent_index]
+						self.body[parent_index] = child_1
+						parent_index = parent_index * 2
+						continue
+					else:
+						self.body[parent_index * 2 + 1] = self.body[parent_index]
+						self.body[parent_index] = child_2
+						parent_index = parent_index * 2 + 1
+						continue
+			elif length - parent_index * 2 == 0:
+				child_1 = self.body[parent_index * 2]
+				if child_1 > self.body[parent_index]:
+					self.body[parent_index * 2] = self.body[parent_index]
+					self.body[parent_index] = child_1
+					break
+				else:
+					break
+			elif length - parent_index * 2 < 0:
+				break
+		return response
 
 	def child_is_min(self, index):
 		child = index
@@ -61,11 +71,29 @@ class Heap():
 			index = parent_index
 
 
+def main():
+	heap = Heap()
+	k = int(input())
+	for l in range(k):
+		command = input().split()
+		if command[0] == 'Insert':
+			heap.insert(int(command[1]))
+		if command[0] == 'ExtractMax':
+	 		print(heap.extract_max())
 
-a = Heap()
-print('done')
-for i in range(32):
-	a.insert(randint(1, 50))
-print(a.body)
-a.extract_max()
-print(a.body)
+
+def test():
+	heap = Heap()
+	result_list = []
+	for i in range(1000):
+		heap.insert(i+1)
+		result_list.append(heap.extract_max())
+		if i > 0:
+			assert result_list[i] - result_list[i-1] == 1
+	heap.insert(15)
+	heap.insert(15)
+	heap.insert(15)
+	print(heap.extract_max())
+
+if __name__ == '__main__':
+	main()
