@@ -1,99 +1,252 @@
 from random import randint
-from time import sleep
+from operator import itemgetter
+from time import sleep, perf_counter
+from sys import stdin
+
+
+def timer(func):
+	def _wrapper(*args, **kwargs):
+		start = perf_counter()
+		result = func(*args, **kwargs)
+		runtime = perf_counter() - start
+		print(f"{func.__name__} took {runtime:.4f} secs")
+		return result
+	return _wrapper
+
+
+def prepare_data_test():
+	### Preparing list with input data for futher tests ###
+	# startings = [randint(1, 3) for i in range(int(5e4))]
+	# endings = [randint(startings[i], 3) for i in range(len(startings))]
+	# lines = [[startings[i], endings[i]] for i in range(len(startings))]
+	# points = [randint(1, 3) for i in range(int(5e4))]
+	startings = [randint(-1e8, 1e8) for i in range(int(5e4))]
+	endings = [randint(startings[i], 1e8) for i in range(len(startings))]
+	lines = [[startings[i], endings[i]] for i in range(len(startings))]
+	points = [randint(-1e8, 1e8) for i in range(int(5e4))]
+	return startings, endings, lines, tuple(points)
+
+
+def prepare_data_main():
+	reader = (list(map(int, line.split())) for line in stdin)
+	lines_total, points_total = next(reader)
+	lines = [next(reader) for i in range(lines_total)]
+	startings = [line[0] for line in lines]
+	endings = [line[1] for line in lines]
+	points = next(reader)
+	# print(startings)
+	# print(endings)
+	return startings, endings, points, lines_total
+
+
+def main():
+	startings, endings, points, lines_total = prepare_data_main()
+
+	### Sorting lists ###
+	quick_sort(array = startings, start = 0, finish = lines_total)
+	quick_sort(array = endings, start = 0, finish = lines_total)
+
+	### Calculating result for each point ###
+	res_dict = {}
+	print_str = ''
+	for target in points:
+		if target in res_dict:
+			print_str += str(res_dict[target])
+			print_str += ' '
+		else:
+			starting_boundary = find_starting_boundary_updated(
+				array = startings,
+				target = target)
+			ending_boundary = find_ending_boundary_updated(
+				array = endings,
+				target = target)
+			result = starting_boundary - ending_boundary
+			res_dict[target] = result
+			print_str += str(result)
+			print_str += ' '
+	print(print_str)
 
 
 def test():
-	array = [[randint(1, 1e8), randint(1, 1e8)] for i in range(50000)]
-	targets = [randint(1, 50000) for i in range(50000)]
-	quick_sort(array = array, start = 0, finish = (len(array) - 1), index = 0)
-	for target in targets:
-		print(f'target = {target}')
-		search_list = array[0: binary_search_startings(array, target) + 1]
-		quick_sort(array = search_list, start = 0, finish = (len(search_list) - 1), index = 1)
-		# print(search_list)
-		res1 = binary_search_endings(search_list, target)
-		# print(f'res1 = {res1}')
-		result_list = search_list[res1:]
-		# print(result_list)
-		# for i in result_list:
-		# 	assert i[0] <= target <= i[1], f'{i}'
-		result = len(result_list)
-		print(result)
-		count = 0
-		assert_list = []
-		for i in range(len(array)):
-			if array[i][0] <= target and array[i][1] >= target:
-				count += 1
-		# 		assert_list.append(array[i])
-		# for i in assert_list:
-		# 	if i not in result_list:
-		# 		print(f'{i} not found')
+	startings, endings, lines, points = prepare_data_test()
 
-		assert count == result, f'{count} != {result}, \n \n {assert_list}, \n \n {search_list}, \n \n {result_list}, '
-		print('ok')
+	### Sorting lists and asserts its ascending ###
+	quick_sort(array = startings, start = 0, finish = len(startings))
+	quick_sort(array = endings, start = 0, finish = len(endings))
+	
+	# for i in range(1, len(startings)):
+	# 	assert startings[i] >= startings[i - 1]
+	# 	assert endings[i] >= endings[i - 1]
 
-
-def quick_sort(array: list, start:int, finish: int, index: int):
-	if finish > start:
-		wall = partition(array, start, finish, index)
-		quick_sort(array, start, wall - 1, index)
-		quick_sort(array, wall + 1, finish, index)
-
-
-def partition(array: list, start: int, finish: int, index: int) -> int:
-	pivot = array[finish][index]
-	wall = start
-	for i in range(start, finish):
-		if array[i][index] > pivot:
-			continue
+	### Calculating result for each point ###
+	res_dict = {}
+	print_str = ''
+	for target in points:
+		if target in res_dict:
+			print_str += str(res_dict[target])
+			print_str += ' '
+			# print(res_dict[target])
 		else:
+			starting_boundary = find_starting_boundary_updated(
+				array = startings,
+				target = target)
+			ending_boundary = find_ending_boundary_updated(
+				array = endings,
+				target = target)
+			# startings_length = len(startings[: starting_boundary])
+			# endings_length = len(endings[: ending_boundary])
+			result = starting_boundary - ending_boundary
+
+			## Naive way to calculate result and verify algorithm result
+			# count = 0
+			# for i in range(len(lines)):
+			# 	if lines[i][0] <= target <= lines[i][1]:
+			# 		count += 1
+			# assert result == count, f'result = {result}, count = {count}, target = {target} \n {startings} \n {endings} \n {starting_boundary} {startings[starting_boundary]}, \n {ending_boundary} {endings[ending_boundary]}'
+			res_dict[target] = result
+			print_str += str(result)
+			print_str += ' '
+	print(print_str)
+
+
+def quick_sort(array: list, start: int, finish: int):
+	if finish > start:
+		finish_1, start_2 = partition(array = array, start = start, finish = finish)
+		quick_sort(array = array, start = start, finish = finish_1)
+		quick_sort(array = array, start = start_2, finish = finish)
+
+
+### Function sorts array in comparison to last value. Returns start and finish of the "wall"###
+def partition(array: list, start: int, finish: int):
+	# print("parted")
+	pivot_index = find_array_median(array = array, start = start, finish = finish - 1)
+	# pivot_index = (finish + start) // 2
+	value_changer(array, pivot_index, finish - 1)
+	pivot_index = finish - 1
+	pivot = array[pivot_index]
+	wall = start
+	i = start
+	while True:
+		if i == pivot_index:
+			break
+		if array[i] == pivot:
+			pivot_index -= 1
+			value_changer(array, i, pivot_index)
+			continue
+		if array[i] > pivot:
+			i += 1
+			continue
+		if array[i] < pivot:
 			value_changer(array, i, wall)
 			wall += 1
-	value_changer(array, wall, finish)
-	return wall
+			i += 1
+			continue
+	start = wall
+	for i in range(pivot_index, finish):
+		value_changer(array, i, wall)
+		wall += 1
+	finish = wall
+	return start, finish
 
 
+def find_array_median(array: list, start: int, finish: int) -> int:
+	lst = [
+	[start, array[start]],
+	[(start + finish) // 2, array[(start + finish) // 2]],
+	[finish, array[finish]]]
+	lst.sort(key=itemgetter(1))
+	return lst[1][0]
+
+
+### Function swaps values in array between 2 indexes ### 
 def value_changer(array: list, index_1: int, index_2: int):
-	value = array[index_1]
+	value_1 = array[index_1]
 	array[index_1] = array[index_2]
-	array[index_2] = value
+	array[index_2] = value_1
 
 
-def binary_search_startings(array: list, target: int) -> int:
+### Function to find target in array and return its index, otherwise it returns next nearest index
+def binary_search(array: list, target: int) -> int:
 	start = 0
 	finish = len(array) - 1
-	while finish - start > 1:
+	while finish - start >= 0:
 		mid = (finish + start) // 2
-		if array[mid][0] == target:
-			while array[mid][0] == target:
-				mid += 1
-			return mid - 1
-		elif array[mid][0] < target:
-			start = mid
-		elif array[mid][0] > target:
-			finish = mid
+		if array[mid] == target:
+			return mid
+		if array[mid] < target:
+			start = mid + 1
+			continue
+		if array[mid] > target:
+			finish = mid - 1
+			continue
+	if array[mid] > target:
+		return mid
+	if array[mid] < target:
+		if mid == len(array) - 1:
+			return mid
+		return mid + 1
+
+
+### Function to define boundary of startings array ###
+def find_starting_boundary_updated(array: list, target: int) -> int:
+	start = binary_search(array = array, target = target)
+	if array[start] < target:
+		return start + 1
+	target_2 = target + 1
+	finish = binary_search(array = array, target = target_2)
+	target_2 = array[finish]
+	if target_2 == target:
+		return finish + 1
+	while finish - start >= 0:
+		# print(finish, start)
+		mid = (finish + start) // 2
+		if array[mid] == target:
+			start = mid + 1
+		if array[mid] == target_2:
+			finish = mid - 1
 	return start
 
 
-def binary_search_endings(array: list, target: int):
-	start = 0
-	finish = len(array) - 1
-	while finish - start > 1:	
-		mid = (start + finish) // 2
-		if array[mid][1] == target:
-			while array[mid][1] == target:
-				mid -= 1
-			print(f'return mid {mid+1}')
-			return mid + 1
-		elif array[mid][1] < target:
-			start = mid
-		elif array[mid][1] > target:
-			finish = mid
-	if array[start][0] <= target <= array[start][1]:
+### Same as "find_starting_boundary" but for endings
+def find_ending_boundary_updated(array: list, target: int) -> int:
+	target_2 = target - 1
+	start = binary_search(array = array, target = target_2)
+	if array[start] == target:
 		return start
-	return finish
+	target_2 == array[start]
+	finish = binary_search(array = array, target = target)
+	while finish - start > 0:
+		mid = (finish + start) // 2
+		if array[mid] == target_2:
+			start = mid + 1
+		if array[mid] == target:
+			finish = mid - 1
+	if array[start] >= target:
+		return start
+	else:
+		return start + 1
+
+
+def generate_test_data():
+	with open('test_data.txt', 'w') as ouf:
+		startings = [randint(-1e8, 1e8) for i in range(int(5e4))]
+		endings = [randint(startings[i], 1e8) for i in range(len(startings))]
+		lines = [[startings[i], endings[i]] for i in range(len(startings))]
+		points = [randint(-1e8, 1e8) for i in range(int(5e4))]
+		write_list = [(str(len(lines)), str(len(points)))]
+		for i in lines:
+			write_list.append(tuple(map(str, i)))
+		write_list.append(tuple(map(str, points)))
+		to_write = ''
+		for i in write_list:
+			to_write += ' '.join(i)
+			if len(i) < 10:
+				to_write += '\n'
+		ouf.write(to_write)
+		
 
 
 if __name__ == '__main__':
 	test()
-
+	# main()
+	# generate_test_data()		
