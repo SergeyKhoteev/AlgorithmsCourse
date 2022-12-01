@@ -23,7 +23,7 @@ def merge(lst1: list, lst2: list) -> list:
 def merge_sort(lst: list, start: int, finish: int) -> list:
 	# print(f'merge_sort(lst: {lst[start:finish]}, start: {start}, finish: {finish})')
 	if finish - start > 1:
-		mid = int((start + finish) / 2)
+		mid = (start + finish) // 
 		return merge(merge_sort(lst, start, mid), merge_sort(lst, mid, finish))
 	return lst[start:finish]
 
