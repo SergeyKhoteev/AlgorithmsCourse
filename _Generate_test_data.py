@@ -81,13 +81,22 @@ def generate_editing_data():
 @generator
 def generate_knapsack_data():
 	n = 10
-	weigths = ' '.join([str(randint(0, 20)) for i in range(n)])
-	capacity = str(20) + ' '
-	# n = randit(1, 3e2)
-	# weigths = ' '.join([str(randint(0, 1e5)) for i in range(n)])
-	# capacity = str(randint(1, 1e4)) + ' '
+	# weigths = ' '.join([str(randint(1, 20)) for i in range(n)])
+	# capacity = str(20) + ' '
+	# n = randint(2e2, 3e2)
+	weigths = ' '.join([str(randint(0, 1e5)) for i in range(n)])
+	capacity = str(randint(1e4, 1e4)) + ' '
 	capacity += str(n)
 	to_write = capacity + '\n' + weigths
+	return to_write
+
+@generator
+def generate_ladder_data():
+	# n = randint(1, 1e2)
+	n = 10
+	# step_labels = ' '.join([str(randint(-1e4, 1e4)) for i in range(n)])
+	step_labels = ' '.join([str(randint(-1e1, 1e1)) for i in range(n)])
+	to_write = str(n) + '\n' + step_labels
 	return to_write
 
 
