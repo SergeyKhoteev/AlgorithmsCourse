@@ -50,3 +50,36 @@ def main():
 if __name__ == '__main__':
 	# test()
 	main()
+
+
+# from random import randint
+
+# def merge_sort(array: list, start: int, finish: int):
+# 	if finish - start > 1:
+# 		m = (start + finish) // 2
+# 		return merge(
+# 			merge_sort(array = array, start = start, finish = m), 
+# 			merge_sort(array = array, start = m, finish = finish))
+# 	else:
+# 		return array[start:finish]
+
+# def merge(array_1: list, array_2: list):
+# 	new_array = []
+# 	empty_array = []
+# 	while array_1 != empty_array and array_2 != empty_array:
+# 		if array_1[0] <= array_2[0]:
+# 			new_array.append(array_1.pop(0))
+# 		else:
+# 			new_array.append(array_2.pop(0))
+# 	return new_array + array_1 + array_2
+
+
+# def main():
+# 	array = [randint(1, 100) for i in range(30)]
+# 	print(array)
+# 	sorted_array = merge_sort(array = array, start = 0, finish = 30)
+# 	print(sorted_array)
+
+
+# if __name__ == '__main__':
+# 	main()

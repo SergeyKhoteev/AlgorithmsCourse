@@ -92,12 +92,17 @@ def generate_knapsack_data():
 
 @generator
 def generate_ladder_data():
-	# n = randint(1, 1e2)
-	n = 10
-	# step_labels = ' '.join([str(randint(-1e4, 1e4)) for i in range(n)])
-	step_labels = ' '.join([str(randint(-1e1, 1e1)) for i in range(n)])
+	n = randint(1, 1e2)
+	# n = 10
+	step_labels = ' '.join([str(randint(-1e4, 1e4)) for i in range(n)])
+	# step_labels = ' '.join([str(randint(-1e1, 1e1)) for i in range(n)])
 	to_write = str(n) + '\n' + step_labels
 	return to_write
+
+
+@generator
+def generate_calc_data():
+	return str(randint(1, 1e5))
 
 
 if __name__ == '__main__':
